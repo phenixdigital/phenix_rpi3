@@ -17,7 +17,7 @@ disable_splash=1
 # This, along with the Raspberry Pi "x" firmware is needed for the camera
 # to work. The Raspberry Pi "x" firmware is selected via the Buildroot
 # configuration. See Target packages->Hardware handling->Firmware.
-gpu_mem=192
+gpu_mem=256
 
 # Enable I2C, SPI, and audio
 dtparam=i2c_arm=on
