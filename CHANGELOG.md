@@ -1,5 +1,252 @@
 # Changelog
 
+## v1.14.0
+
+This release updates to Buildroot 2020.11.2, GCC 10.2 and OTP 23.2.4.
+
+When migrating custom systems based on this one, please be aware of the
+following important changes:
+
+* There's a new `getrandom` syscall that is made early in BEAM startup. This has
+  the potential to block the BEAM before Nerves can start `rngd` to provide
+  entropy. We have not seen this issue here, but have updated `erlinit.config`
+  for the time being as a precaution.
+* The GCC 10.2.0 toolchain has a different name that calls out "nerves" as the
+  vendor and the naming is now more consistent with other toolchain providers.
+* Experimental support for tooling that requires more information about the
+  target has been added. The initial support focuses on zigler.
+
+If you're upgrading from a release before v1.13.3, please see the release notes
+for the versions below as well.
+
+* Updated dependencies
+  * [nerves_system_br: bump to v1.14.4](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.14.4)
+  * [Buildroot 2020.11.2](http://lists.busybox.net/pipermail/buildroot/2021-January/302574.html)
+  * [Erlang/OTP 23.2.4](https://erlang.org/download/OTP-23.2.4.README)
+  * [Nerves toolchains 1.4.1](https://github.com/nerves-project/toolchains/releases/tag/v1.4.1)
+
+## v1.13.3
+
+This is a bug fix release and contains no major changes.
+
+* Updated dependencies
+  * [nerves_system_br: bump to v1.13.7](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.13.7)
+  * [Erlang/OTP 23.1.5](https://erlang.org/download/OTP-23.1.5.README)
+
+## v1.13.2
+
+This release includes a patch release update to
+[Buildroot 2020.08.2](http://lists.busybox.net/pipermail/buildroot/2020-November/296830.html).
+
+* Updated dependencies
+  * [nerves_system_br: bump to v1.13.5](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.13.5)
+  * [erlinit 1.9.0](https://github.com/nerves-project/erlinit/releases/tag/v1.9.0)
+
+* Improvements
+  * Switched source for built-in WiFi module firmware. This pulls in newer
+    firmware versions that were found to fix issues on the Raspberry Pi 4. It
+    may improve built-in WiFi on other Raspberry Pis.
+
+## v1.13.1
+
+The main change in this release is to bump the Linux kernel to 5.4. This follows
+the kernel update in the Raspberry Pi OS.
+
+If you have based a custom system off of this one, please inspect the
+`nerves_defconfig` for WiFi firmware changes. WiFi firmware is no longer being
+pulled from the `rpi-wifi-firmware` since that package is out of date.
+
+Additionally, the upstream Raspberry Pi kernel changed the
+`pi3-miniuart-bt.dtbo` overlay's name to `miniuart-bt.dtbo`. The easy fix is to
+do a global search for `pi3-miniuart-bt` and replace it with `miniuart-bt`.
+
+* Updated dependencies
+  * [nerves_system_br: bump to v1.13.4](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.13.4)
+  * [Erlang/OTP 23.1.4](https://erlang.org/download/OTP-23.1.4.README)
+  * [boardid 1.10.0](https://github.com/nerves-project/boardid/releases/tag/v1.10.0)
+
+* Improvements
+  * Enabled reproducible builds in Buildroot to remove some timestamp and build
+    path differences in firmware images. This helps delta firmware updates.
+  * The memory cgroup controller is no longer enabled by default. This was an
+    upstream change. As a result, the memory cgroup directory is no longer
+    mounted.
+
+## v1.13.0
+
+This release updates to [Buildroot
+2020.08](http://lists.busybox.net/pipermail/buildroot/2020-September/290797.html) and OTP 23.1.1.
+
+* Updated dependencies
+  * [nerves_system_br: bump to v1.13.2](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.13.2)
+  * [Erlang/OTP 23.1.1](https://erlang.org/download/OTP-23.1.1.README)
+  * [erlinit 1.8.0](https://github.com/nerves-project/erlinit/releases/tag/v1.8.0)
+  * [nerves 1.7.0](https://github.com/nerves-project/nerves/releases/tag/v1.7.0)
+
+* New features
+  * Added support for updating the root filesystem using firmware patches.
+    See the [firmware patch docs](https://hexdocs.pm/nerves/experimental-features.html#content) for more information.
+
+## v1.12.2
+
+This release updates to [Buildroot
+2020.05.1](http://lists.busybox.net/pipermail/buildroot/2020-July/287824.html)
+and OTP 23.0.3 which are both bug fix releases.
+
+* Updated dependencies
+  * [nerves_system_br: bump to v1.12.4](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.12.4)
+  * [Erlang/OTP 23.0.3](https://erlang.org/download/OTP-23.0.3.README)
+  * [nerves_heart v0.3.0](https://github.com/nerves-project/nerves_heart/releases/tag/v0.3.0)
+
+* New features
+  * The `/data` directory now exists for storing application-specific data. It
+    is currently a symlink to `/root`. Using `/data` will eventually be
+    encouraged over `/root` even though currently there is no advantage. This
+    change makes it possible to start migrating paths in applications and
+    libraries.
+
+* Fixes
+  * Fixed old references to the `-Os` compiler flag. All C/C++ code will default
+    to using `-O2` now.
+
+## v1.12.1
+
+* Fixes
+  * Remove `nerves_system_linter` from hex package. This fixes mix dependency
+    errors in projects that reference systems with different
+    `nerves_system_linter` dependency specs.
+
+## v1.12.0
+
+This release updates the system to use Buildroot 2020.05 and Erlang/OTP 23.
+Please see the respective release notes for updates and deprecations in both
+projects for changes that may affect your application.
+
+* New features
+  * Support the Raspberry Pi Sense HAT's joystick
+  * Enable WiFi mesh support in the 802.11 stack
+
+* Updated dependencies
+  * [nerves_system_br v1.12.0](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.12.0)
+  * [Erlang/OTP 23.0.2](https://erlang.org/download/OTP-23.0.2.README)
+  * [Linux 4.19.118 (Raspberry Pi 1.2020601 tag)](https://github.com/raspberrypi/linux/tree/raspberrypi-kernel_1.20200601-1)
+  * [Raspberry Pi firmware 1.2020601](https://github.com/raspberrypi/firmware/tree/1.20200601)
+
+## v1.11.2
+
+* Updated dependencies
+  * [nerves_system_br v1.11.4](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.11.4)
+  * Erlang 22.3.4.1
+  * fwup 1.7.0
+
+## v1.11.1
+
+* Updated dependencies
+  * [nerves_system_br v1.11.2](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.11.2)
+  * Erlang 22.3.1
+  * erlinit 1.7.0 - tty initialization support
+  * fwup 1.6.0 - xdelta3/VCDIFF patch support
+  * Enable unixodbc so that Erlang's odbc application can be used in projects
+
+## v1.11.0
+
+This release updates Buildroot to 2020.02 and upgrades gcc from 8.3 to 9.2.
+While this is a minor version bump due to the Buildroot release update, barring
+advanced usage of Nerves, this is a straightforward update from v1.10.2.
+
+* Updated dependencies
+  * [nerves_system_br v1.11.0](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.11.0)
+  * linux 4.19.97 (raspberrypi-kernel_1.20200212-1 tag)
+  * Erlang 22.2.8
+
+## v1.10.2
+
+* Updated dependencies
+  * [nerves_system_br v1.10.2](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.10.2)
+  * Erlang 22.2.4
+
+## v1.10.1
+
+* Enhancements
+  * Set `expand=true` on the application data partition. This will only take
+    effect for users running the complete task, fwup will not expand application
+    data partitions that exist during upgrade tasks.
+
+* Updated dependencies
+  * [nerves_system_br v1.10.1](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.10.1)
+  * Erlang 22.2.3
+
+## v1.10.0
+
+This release updates Buildroot to 2019.11 with security and bug fix updates
+across Linux packages. Enables dnsd, udhcpd and ifconfig in the default
+Busybox configuration to support `vintage_net` and `vintage_net_wizard`.
+See the `nerves_system_br` notes for details.
+
+* Updated dependencies
+  * [nerves_system_br v1.10.0](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.10.0)
+  * Erlang 22.1.8
+
+## v1.9.2
+
+This release updates Buildroot to 2019.08.2 with security and bug fix updates
+across Linux packages. See the `nerves_system_br` notes for details.
+Erlang/OTP is now at 22.1.7.
+
+* Updated dependencies
+  * [nerves_system_br v1.9.5](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.9.5)
+
+## v1.9.1
+
+This release pulls in security and bug fix updates from `nerves_system_br`.
+Erlang/OTP is now at 22.1.1.
+
+* Updated dependencies
+  * [nerves_system_br v1.9.4](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.9.4)
+  * linux - update to the raspberrypi-kernel_1.20190925-1 tag
+
+## v1.9.0
+
+This release updates Buildroot to 2019.08 with security and bug fix updates
+across Linux packages. See the `nerves_system_br` notes for details.
+
+* Updated dependencies
+  * [nerves_system_br v1.9.2](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.9.2)
+
+* Enhancements
+  * Support a variety of USB->UART adapters so more devices work out-of-the-box
+
+## v1.8.2
+
+This release fixes an issue that broke display output on small LCD screens.
+Updating the Raspberry Pi firmware to the latest from the Raspberry Pi
+Foundation fixed the issue. See
+https://github.com/fhunleth/rpi_fb_capture/issues/2 for details.
+
+* Updated dependencies
+  * [nerves_system_br v1.8.5](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.8.5)
+
+## v1.8.1
+
+* Updated dependencies
+  * [nerves_system_br v1.8.4](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.8.4)
+  * Linux 4.19.58 with patches from the Raspberry Pi Foundation
+
+## v1.8.0
+
+This release
+
+This release updates Erlang to OTP 22 and gcc from version 7.3.0 to 8.3.0.
+See the nerves_system_br and toolchain release notes for more information.
+
+* Enhancements
+  * Enable source-based routing in the Linux kernel to support [vintage_net](https://github.com/nerves-networking/vintage_net)
+
+* Updated dependencies
+  * Erlang 22.0.4
+  * [nerves_system_br v1.8.2](https://github.com/nerves-project/nerves_system_br/releases/tag/v1.8.2)
+  * [nerves_toolchain_arm_unknown_linux_gnueabihf v1.2.0](https://github.com/nerves-project/toolchains/releases/tag/v1.2.0)
+
 ## v1.7.2
 
 * Bux fixes

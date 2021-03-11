@@ -1,7 +1,9 @@
 defmodule PhenixRpi3.MixProject do
   use Mix.Project
 
+  @github_organization "phenixdigital"
   @app :phenix_rpi3
+  @source_url "https://github.com/#{@github_organization}/#{@app}"
   @version Path.join(__DIR__, "VERSION")
            |> File.read!()
            |> String.trim()
@@ -17,7 +19,12 @@ defmodule PhenixRpi3.MixProject do
       package: package(),
       deps: deps(),
       aliases: [loadconfig: [&bootstrap/1], docs: ["docs", &copy_images/1]],
-      docs: [extras: ["README.md"], main: "readme"]
+      docs: docs(),
+      preferred_cli_env: %{
+        docs: :docs,
+        "hex.build": :docs,
+        "hex.publish": :docs
+      }
     ]
   end
 
@@ -35,12 +42,21 @@ defmodule PhenixRpi3.MixProject do
     [
       type: :system,
       artifact_sites: [
-        {:github_releases, "phenixdigital/phenix_rpi3"}
+        {:github_releases, "#{@github_organization}/#{@app}"}
       ],
       build_runner_opts: build_runner_opts(),
       platform: Nerves.System.BR,
       platform_config: [
         defconfig: "nerves_defconfig"
+      ],
+      # The :env key is an optional experimental feature for adding environment
+      # variables to the crosscompile environment. These are intended for
+      # llvm-based tooling that may need more precise processor information.
+      env: [
+        {"TARGET_ARCH", "arm"},
+        {"TARGET_CPU", "cortex_a53"},
+        {"TARGET_OS", "linux"},
+        {"TARGET_ABI", "gnueabihf"}
       ],
       checksum: package_files()
     ]
@@ -48,11 +64,11 @@ defmodule PhenixRpi3.MixProject do
 
   defp deps do
     [
-      {:nerves, "~> 1.7", runtime: false},
-      {:nerves_system_br, "1.8.1", runtime: false},
-      {:nerves_toolchain_arm_unknown_linux_gnueabihf, "1.1.0", runtime: false},
-      {:nerves_system_linter, "~> 0.3.0", runtime: false},
-      {:ex_doc, "~> 0.18", only: [:dev, :test], runtime: false}
+      {:nerves, "~> 1.5.4 or ~> 1.6.0 or ~> 1.7.4", runtime: false},
+      {:nerves_system_br, "1.14.5", runtime: false},
+      {:nerves_toolchain_armv7_nerves_linux_gnueabihf, "~> 1.4.0", runtime: false},
+      {:nerves_system_linter, "~> 0.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.22", only: :docs, runtime: false}
     ]
   end
 
@@ -62,12 +78,21 @@ defmodule PhenixRpi3.MixProject do
     """
   end
 
+  defp docs do
+    [
+      extras: ["README.md", "CHANGELOG.md"],
+      main: "readme",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      skip_undefined_reference_warnings_on: ["CHANGELOG.md"]
+    ]
+  end
+
   defp package do
     [
-      maintainers: ["Frank Hunleth", "Justin Schneck"],
       files: package_files(),
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/nerves-project/#{@app}"}
+      links: %{"GitHub" => @source_url}
     ]
   end
 
@@ -81,7 +106,7 @@ defmodule PhenixRpi3.MixProject do
       "fwup-revert.conf",
       "fwup.conf",
       "LICENSE",
-      "linux-4.19.defconfig",
+      "linux-5.4.defconfig",
       "mix.exs",
       "nerves_defconfig",
       "post-build.sh",
@@ -98,10 +123,9 @@ defmodule PhenixRpi3.MixProject do
   end
 
   defp build_runner_opts() do
-    if primary_site = System.get_env("BR2_PRIMARY_SITE") do
-      [make_args: ["BR2_PRIMARY_SITE=#{primary_site}"]]
-    else
-      []
+    case System.get_env("BR2_PRIMARY_SITE") do
+      nil -> []
+      primary_site -> [make_args: ["BR2_PRIMARY_SITE=#{primary_site}"]]
     end
   end
 
