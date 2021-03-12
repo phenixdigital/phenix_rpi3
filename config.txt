@@ -14,6 +14,9 @@ kernel=zImage
 # Disable the boot rainbow
 disable_splash=1
 
+# Disable borders around the background image
+disable_overscan=1
+
 # This, along with the Raspberry Pi "x" firmware is needed for the camera
 # to work. The Raspberry Pi "x" firmware is selected via the Buildroot
 # configuration. See Target packages->Hardware handling->Firmware.
